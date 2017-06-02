@@ -4,11 +4,11 @@ import matplotlib.pyplot as plt
 
 # ----------------------------------------------------------------------------------------------------------------------
 # PARAMETERS
-sigma = 0.05
-th_track_angle = -0.1    # -0.03
-th_abs_track_angle = 0.1 #  0.013
+sigma = 0.01
+th_track_angle = -2.0
+th_abs_track_angle = 0.2
 th_speed = 0.0
-alpha = 1e-8
+alpha = 1e-10
 gamma = 0.8
 
 def saturation(value, min, max):
@@ -22,7 +22,7 @@ def saturation(value, min, max):
 
 def get_track_angle(observ_gray):
     angle_append = []
-    lat = range(47 - 10, 47 + 10)  # +- 20 is better than +- 10
+    lat = range(47 - 20, 47 + 20)  # +- 20 is better than +- 10
     lon = range(30, 65)
     for i in lat:
         for j in lon:
@@ -56,12 +56,8 @@ def gaussian_policy(sigma, track_angle, abs_track_angle, th_track_angle, th_abs_
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-data_log_append = []
-
-
 env = gym.make('CarRacing-v0')
-for i in range(50):
-    print('start episode', i)
+for i in range(1000):
     observ = env.reset()
     np.set_printoptions(threshold='nan')
 
@@ -123,13 +119,11 @@ for i in range(50):
 
             # Parameter Update
             for i in range(return_append.shape[0]):
-                th_track_angle += alpha * score_append[i] * return_append[i] * 0.1
-                th_abs_track_angle -= alpha * score2_append[i] * return_append[i]
+                th_track_angle += alpha * score_append[i] * return_append[i]
+                th_abs_track_angle += alpha * score2_append[i] * return_append[i]
             print(th_track_angle)
             print(th_abs_track_angle)
             print('updated')
-            data_log_append.append([step_count, reward_sum, th_track_angle, th_abs_track_angle])
-            step_count = 0
             break
 
 
@@ -147,10 +141,3 @@ for i in range(50):
         # plt.show()
         # print(observ_gray.shape)
         # print(type(observ_gray))
-
-np.save('data_log', data_log_append)
-
-
-data_log = np.load('data_log.npy')
-plt.plot(data_log[:, 1])
-plt.show()
