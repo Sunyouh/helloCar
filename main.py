@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 # PARAMETERS
 sigma = 0.05
 th_track_angle = -0.1    # -0.03
-th_abs_track_angle = 0.1 #  0.013
+th_abs_track_angle = 0.013 #  0.013
 th_speed = 0.0
 alpha = 1e-8
 gamma = 0.8
