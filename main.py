@@ -1,6 +1,8 @@
 import numpy as np
 import gym
 import matplotlib.pyplot as plt
+import cv2
+import pandas as pd
 
 # ----------------------------------------------------------------------------------------------------------------------
 # PARAMETERS
@@ -10,6 +12,7 @@ th_abs_track_angle = 0.013 #  0.013
 th_speed = 0.0
 alpha = 1e-8
 gamma = 0.8
+
 
 def saturation(value, min, max):
     if value > max:
@@ -36,12 +39,12 @@ def get_track_angle(observ_gray):
 
 
 def get_speed(observ):
-    speed = np.count_nonzero(observ[84:, 13] == [255, 255, 255]) / 3.0
-    return speed
+    _gray = cv2.cvtColor(observ, cv2.COLOR_BGR2GRAY)
+    return np.count_nonzero(_gray[84:, 13] == 255)
 
 
 def to_gray_scale(observ):
-    observ_gray = 0.2126 * observ[:, :, 0] + 0.7152 * observ[:, :, 1] + 0.0722 * observ[:, :, 2]
+    observ_gray = cv2.cvtColor(observ, cv2.COLOR_RGB2GRAY)
     return observ_gray
 
 
@@ -57,7 +60,7 @@ def gaussian_policy(sigma, track_angle, abs_track_angle, th_track_angle, th_abs_
 # ---------------------------------------------------------------------------------------------------------------------
 
 data_log_append = []
-
+data_frame = None
 
 env = gym.make('CarRacing-v0')
 for i in range(50):
@@ -130,6 +133,7 @@ for i in range(50):
             print('updated')
             data_log_append.append([step_count, reward_sum, th_track_angle, th_abs_track_angle])
             step_count = 0
+            data_frame = pd.DataFrame(data_log_append)
             break
 
 
@@ -149,6 +153,7 @@ for i in range(50):
         # print(type(observ_gray))
 
 np.save('data_log', data_log_append)
+data_frame.to_csv('dl')
 
 
 data_log = np.load('data_log.npy')
